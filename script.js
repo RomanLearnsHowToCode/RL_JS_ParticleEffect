@@ -90,6 +90,36 @@ function init() {
     }
 }
 
+// check if particles are close enough to draw line between them
+/*
+    first we will cycle through variable a and inside we will cycle through variable b
+    variable a will represent each individual particle in our array and variable b will represent all
+    the consecutive particles in the same array. In inner loop we see b = a, we need to do this to allow us 
+    to compare their x and y coordinates and calculate their distance
+
+    the loop goes like this:
+    1 compare to 2 (1:2), 1:3, 1:4 etc until end of array, we exit inner loop, outer loop will set a to value 2
+    and we enter the inner loop again 2:3, 2:4, 2:5 etc..
+
+
+*/
+function connect(){
+    for (let a = 0; a < particlesArray.length; a++){
+        for (let b = a; b < particlesArray.length; b++){
+            let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) + 
+                           ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+            if(distance < (canvas.width/7) * (canvas.height/7)) {
+                ctx.strokeStyle = 'rgba(140,85,31,1)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                ctx.stroke();
+            }
+        }
+    }
+}
+
 // animation loop
 function animate() {
     requestAnimationFrame(animate);
@@ -98,7 +128,25 @@ function animate() {
     for (let i = 0; i < particlesArray.length; i++){
         particlesArray[i].update();
     }
+    connect();
 }
+
+// if the window has been resized, then calculate the canvas dimensions and mouse radius (basically just adjust, and then call init again)
+window.addEventListener('resize',
+    function(){
+        canvas.width = this.innerWidth;
+        canvas.height = this.innerHeight;
+        mouse.radius = ((canvas.height/80) * (canvas.width/80));
+        init();
+})
+
+// mouse out listener - particles react with mouse even if the mouse if out of canvas, because that's the last known position of mouse on canvas
+
+window.addEventListener('mouseout',
+    function(){
+        mouse.x = undefined;
+        mouse.y = undefined;
+})
 
 init();
 animate();
